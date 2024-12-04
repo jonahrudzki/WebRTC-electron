@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <title>WebRTC Example</title>
+    <style>
+    .video-container {
+        margin: 0px auto;
+        width: 500px;
+        height: 375px;
+        border: 10px #333 solid;
+    }
+    .video-element {
+        width: 500px;
+        height: 375px;
+        background-color: #666;
+    }
+    </style>
+  </head>
+  <body>
+    <h1>WebRTC Streams</h1>
+    <div id="local-client">
+        <span>Your Stream</span>
+        <div class="video-container" id="local-container">
+            <video class="video-element" id="local-video" autoplay="true">
+                
+            </video>
+        </div>
+        <script>
+            const video = document.getElementById('local-video')
+
+            if (navigator.mediaDevices.getUserMedia) {
+                navigator.mediaDevices.getUserMedia({ video: true })
+                    .then((stream) => {
+                        video.srcObject = stream;
+                    })
+                    .catch((err) => {
+                        console.log("Something went wrong!");
+                    });
+            }
+        </script>
+    </div>
+  </body>
+</html>
