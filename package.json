@@ -12,5 +12,9 @@
   "description": "WebRTC streaming between clients usign electron.js",
   "devDependencies": {
     "electron": "^33.2.1"
+  },
+  "dependencies": {
+    "express": "^4.21.2",
+    "socket.io": "^4.8.1"
   }
 }

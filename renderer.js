@@ -46,6 +46,7 @@ let createOffer = async () => {
         // THIS starts making a series of requests to the STUN server, and creates ICE candidates
         await peerConnection.setLocalDescription(offer);
 
+        document.getElementById("create-offer").innerText = JSON.stringify(offer);
         console.log('Offer:', offer);
     } catch (error) {
         console.error('Error creating WebRTC offer:', error);
@@ -59,7 +60,8 @@ let init = async () => {
     const localVideo = document.getElementById('local-video')
     localVideo.srcObject = localStream
 
-    await createOffer();
+    // Changed to on click
+    // await createOffer();
 };
 
 init()
