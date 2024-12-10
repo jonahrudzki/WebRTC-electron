@@ -1,4 +1,5 @@
 const { app, BrowserWindow } = require('electron')
+const { networkInterfaces } = require('node:os')
 const path = require('node:path')
 
 const createWindow = () => {
@@ -10,6 +11,7 @@ const createWindow = () => {
         }
     })
 
+    win.webContents.openDevTools()
     win.loadFile('index.html')
 }
 

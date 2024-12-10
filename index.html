@@ -29,46 +29,16 @@
         <div id="left-child">
             <span><h2>Your Stream</h2></span>
             <div class="video-container" id="local-container">
-                <video class="video-element" id="local-video" autoplay="true">
-                    
-                </video>
+                <video class="video-element" id="local-video" autoplay="true"></video>
             </div>
-            <script>
-                const localVideo = document.getElementById('local-video')
-    
-                if (navigator.mediaDevices.getUserMedia) {
-                    navigator.mediaDevices.getUserMedia({ video: true })
-                        .then((stream) => {
-                            localVideo.srcObject = stream;
-                        })
-                        .catch((err) => {
-                            console.log("Something went wrong!");
-                        });
-                }
-            </script>
         </div>
         <div id="right-child">
             <span><h2>Remote Stream</h2></span>
             <div class="video-container" id="remote-container">
-                <video class="video-element" id="remote-video" autoplay="true">
-                    
-                </video>
+                <video class="video-element" id="remote-video" autoplay="true"></video>
             </div>
-            <script>
-                const remoteVideo = document.getElementById('remote-video')
-    
-                if (navigator.mediaDevices.getUserMedia) {
-                    navigator.mediaDevices.getUserMedia({ video: true })
-                        .then((stream) => {
-                            remoteVideo.srcObject = stream;
-                        })
-                        .catch((err) => {
-                            console.log("Something went wrong!");
-                        });
-                }
-            </script>
         </div>
     </div>
-    
+    <script src="renderer.js"></script>
   </body>
 </html>
