@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>WebRTC Screen Share Client (Browser)</title>
+    <style>
+      #local-video, #remote-video {
+        width: 500px;
+        height: 375px;
+        background-color: #333;
+        border: 2px solid #000;
+      }
+      .container {
+        display: flex;
+        justify-content: space-between;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>WebRTC Screen Share Connection</h1>
+    <div class="container">
+      <div>
+        <h2>Your Screen</h2>
+        <video id="local-video" autoplay muted></video>
+      </div>
+      <div>
+        <h2>Remote Stream</h2>
+        <video id="remote-video" autoplay></video>
+      </div>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+      const socket = io('http://localhost:8080');
+      let peerConnection;
+      let localStream;
+      const servers = {
+        iceServers: [
+          { urls: 'stun:stun1.l.google.com:19302' },
+          { urls: 'stun:stun2.l.google.com:19302' },
+        ],
+      };
+
+      // Initialize local screen stream
+      async function init() {
+        try {
+          // Request screen sharing (getDisplayMedia)
+          localStream = await navigator.mediaDevices.getDisplayMedia({
+            video: true,
+            audio: false,
+          });
+          const localVideo = document.getElementById('local-video');
+          localVideo.srcObject = localStream;
+
+          setupSocketListeners();
+        } catch (err) {
+          console.error('Error accessing screen:', err);
+        }
+      }
+
+      // Create an SDP offer (Caller)
+      async function createOffer() {
+        setupPeerConnection();
+        try {
+          const offer = await peerConnection.createOffer();
+          await peerConnection.setLocalDescription(offer);
+          socket.emit('offer', offer);
+        } catch (err) {
+          console.error('Error creating offer:', err);
+        }
+      }
+
+      // Respond to an SDP offer (Callee)
+      socket.on('offer', async (offer) => {
+        console.log('Received offer:', offer);
+        setupPeerConnection();
+        await peerConnection.setRemoteDescription(new RTCSessionDescription(offer));
+        const answer = await peerConnection.createAnswer();
+        await peerConnection.setLocalDescription(answer);
+        socket.emit('answer', answer);
+      });
+
+      // Handle incoming SDP answer
+      socket.on('answer', async (answer) => {
+        await peerConnection.setRemoteDescription(new RTCSessionDescription(answer));
+      });
+
+      // Handle incoming ICE candidates
+      socket.on('candidate', async (candidate) => {
+        try {
+          await peerConnection.addIceCandidate(new RTCIceCandidate(candidate));
+        } catch (err) {
+          console.error('Error adding ICE candidate:', err);
+        }
+      });
+
+      // Setup the peer connection and handle media streams
+      function setupPeerConnection() {
+        peerConnection = new RTCPeerConnection(servers);
+        peerConnection.onicecandidate = (event) => {
+          if (event.candidate) {
+            socket.emit('candidate', event.candidate);
+          }
+        };
+        peerConnection.ontrack = (event) => {
+          const remoteVideo = document.getElementById('remote-video');
+          remoteVideo.srcObject = event.streams[0];
+        };
+
+        // Add tracks from local stream (screen)
+        localStream.getTracks().forEach((track) => {
+          peerConnection.addTrack(track, localStream);
+        });
+      }
+
+      // Start the connection process
+      init();
+    </script>
+  </body>
+</html>

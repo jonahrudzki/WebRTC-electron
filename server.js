@@ -1,6 +1,7 @@
 // server.js
 
 const express = require('express');
+const path = require('path');
 const http = require('http');
 const socketIo = require('socket.io');
 
@@ -9,8 +10,13 @@ const app = express();
 const server = http.createServer(app);
 const io = socketIo(server);
 
+// Serve index2.html when accessing the root URL
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'index2.html'));
+});
+
 // Serve static files (for example: index.html)
-app.use(express.static('public'));
+app.use(express.static(path.join(__dirname)));
 
 // Set up WebSocket communication using socket.io
 io.on('connection', socket => {
