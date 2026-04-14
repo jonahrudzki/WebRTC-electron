@@ -12,7 +12,7 @@ const servers = {
 
 const socket = io('http://localhost:8080'); // Connect to the signaling server
 
-// Initialize local video and media stream (no audio)
+// Initialize local video stream
 let init = async () => {
   localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
   const localVideo = document.getElementById('local-video');
@@ -48,7 +48,7 @@ socket.on('offer', async (offer) => {
   }
 });
 
-// Handle incoming SDP answer (Caller)
+// Handle SDP answer (Caller)
 socket.on('answer', async (answer) => {
   try {
     await peerConnection.setRemoteDescription(new RTCSessionDescription(answer));
@@ -66,7 +66,7 @@ socket.on('candidate', async (candidate) => {
   }
 });
 
-// Set up RTCPeerConnection and attach event handlers
+// Set up RTCPeerConnection and event handlers
 let setupPeerConnection = () => {
   peerConnection = new RTCPeerConnection(servers);
   remoteStream = new MediaStream();
@@ -78,7 +78,7 @@ let setupPeerConnection = () => {
     peerConnection.addTrack(track, localStream);
   });
 
-  // Add received tracks to remote stream
+  // Add incoming tracks to remote stream
   peerConnection.ontrack = (event) => {
     event.streams[0].getTracks().forEach(track => {
       remoteStream.addTrack(track);
@@ -91,29 +91,6 @@ let setupPeerConnection = () => {
       socket.emit('candidate', event.candidate);
     }
   };
-};
-
-// Handle socket listeners for user actions
-let setupSocketListeners = () => {
-  document.getElementById('sdp-offer').addEventListener('input', (e) => {
-    let offer = e.target.value;
-    try {
-      let parsedOffer = JSON.parse(offer);
-      socket.emit('offer', parsedOffer);
-    } catch (error) {
-      console.error('Error parsing offer:', error);
-    }
-  });
-
-  document.getElementById('sdp-answer').addEventListener('input', (e) => {
-    let answer = e.target.value;
-    try {
-      let parsedAnswer = JSON.parse(answer);
-      socket.emit('answer', parsedAnswer);
-    } catch (error) {
-      console.error('Error parsing answer:', error);
-    }
-  });
 };
 
 // Call init function to start video stream
